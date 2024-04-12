@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
 
+# Function to check if the current betting category contains "Over/Under" odds
 def is_valid_category(driver):
     try:
         table_head = driver.find_element(By.CLASS_NAME, 'sportsbook-table__head')
@@ -19,6 +20,7 @@ def is_valid_category(driver):
         return False
 
 
+# Converts game times from string format to structured datetime format
 def convert_time_format(time_str):
     now = datetime.now()
     parts = time_str.split()
@@ -39,6 +41,7 @@ def convert_time_format(time_str):
     return formatted_time, formatted_date
 
 
+# Converts local time to UTC time
 def local_to_utc(local_time_str):
     local_time = datetime.strptime(local_time_str, '%Y-%m-%dT%H:%M:%S')
     current_zone = datetime.now().astimezone().tzinfo
@@ -48,12 +51,14 @@ def local_to_utc(local_time_str):
     return formatted_utc_time
 
 
+# Extracts team names from a given event
 def extract_team_name(event):
     team_name = event.find_element(By.CLASS_NAME, 'sportsbook-event-accordion__title-wrapper').text
     team_names = team_name.split('\n')
     return team_names[0], team_names[-1]
 
 
+# Extracts betting data from a single row in the odds table
 def extract_event_data(row):
     player_name = row.find_element(By.CLASS_NAME, 'sportsbook-row-name').text
     td_elements = row.find_elements(By.TAG_NAME, 'td')
@@ -72,6 +77,7 @@ def extract_event_data(row):
     return data_entries
 
 
+# Creates data rows for each player and event
 def create_data_rows(game_time_utc, game_time_local, game_date, main_category_type, sub_category_type, home_team,
                      away_team, event_data):
     data_rows = []
@@ -92,6 +98,7 @@ def create_data_rows(game_time_utc, game_time_local, game_date, main_category_ty
     return DataFrame(data_rows)
 
 
+# Scrapes data from a subcategory if valid
 def scrape_sub_category(driver, main_category, sub_category):
     all_data_frames = []
     if not is_valid_category(driver):
@@ -120,6 +127,7 @@ def scrape_sub_category(driver, main_category, sub_category):
     return concat(all_data_frames, ignore_index=True)
 
 
+# Continues to click through subcategories and scrape data under the main category
 def scrape_main_category(driver, result, category):
     continue_clicking = True
 
@@ -144,6 +152,7 @@ def scrape_main_category(driver, result, category):
     return result
 
 
+# Sets up the scraper to run at specified intervals
 def run_scrape():
     websites = ['https://sportsbook.draftkings.com/leagues/baseball/mlb?category=batter-props',
                 'https://sportsbook.draftkings.com/leagues/baseball/mlb?category=pitcher-props']
@@ -160,6 +169,7 @@ def run_scrape():
     driver.quit()
 
 
+# Schedules the scraper function to run periodically
 def main():
     run_scrape()
     schedule.every(20).minutes.do(run_scrape)
