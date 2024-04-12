@@ -16,6 +16,7 @@ First, clone the Git repository to your local machine:
 
 ```bash
 git clone https://github.com/GeuseWei/MLB-Odds-Web-Scraping.git
+cd MLB-Odds-Web-Scraping
 ```
 
 Next, create a Python virtual environment and activate it:
