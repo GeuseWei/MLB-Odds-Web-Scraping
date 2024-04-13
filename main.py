@@ -4,7 +4,7 @@ from selenium import webdriver
 from pandas import DataFrame, concat
 from selenium.webdriver.common.by import By
 from datetime import datetime, timezone, timedelta
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
@@ -102,6 +102,7 @@ def create_data_rows(game_time_utc, game_time_local, game_date, main_category_ty
 def scrape_sub_category(driver, main_category, sub_category):
     all_data_frames = []
     if not is_valid_category(driver):
+        print(f"{sub_category} does not have Over or Under odds. Skipping this sub category.")
         return DataFrame()
 
     main_category_type = main_category
@@ -130,6 +131,7 @@ def scrape_sub_category(driver, main_category, sub_category):
 # Continues to click through subcategories and scrape data under the main category
 def scrape_main_category(driver, result, category):
     continue_clicking = True
+    print(f"Starting to scrape main category: {category}")
 
     while continue_clicking:
         try:
@@ -137,6 +139,7 @@ def scrape_main_category(driver, result, category):
                                                 "a.sportsbook-tabbed-subheader__tab-link[aria-selected='true']")
             main_category = category
             sub_category = selected_link.text
+            print(f"Now scraping sub category: {sub_category}")
             sub_category_data = scrape_sub_category(driver, main_category, sub_category)
             result = concat([result, sub_category_data], ignore_index=True)
 
@@ -160,22 +163,34 @@ def run_scrape():
     driver = webdriver.Chrome()
     result = DataFrame()
 
-    for website in websites:
-        driver.get(website)
-        category = 'BATTER PROPS' if 'batter-props' in website else 'PITCHER PROPS'
-        result = scrape_main_category(driver, result, category)
+    try:
+        for website in websites:
+            driver.get(website)
+            category = 'BATTER PROPS' if 'batter-props' in website else 'PITCHER PROPS'
+            result = scrape_main_category(driver, result, category)
 
-    result.to_csv('result.csv', index=False)
-    driver.quit()
+        result.to_csv('result.csv', index=False)
+        print("This scraping session is complete. Please check the results in result.csv."
+              "The next scrape will occur in 20 minutes.")
+
+    except WebDriverException:
+        print("The web driver encountered an issue.")
+    except Exception as e:
+        print("An unexpected error occurred:", e)
+    finally:
+        driver.quit()
 
 
 # Schedules the scraper function to run periodically
 def main():
-    run_scrape()
-    schedule.every(20).minutes.do(run_scrape)
-    while True:
-        schedule.run_pending()
-        sleep(1)
+    try:
+        run_scrape()
+        schedule.every(20).minutes.do(run_scrape)
+        while True:
+            schedule.run_pending()
+            sleep(1)
+    except KeyboardInterrupt:
+        print("Program has been interrupted by the user.")
 
 
 if __name__ == "__main__":
