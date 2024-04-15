@@ -1,4 +1,5 @@
 import schedule
+import logging
 from time import sleep
 from selenium import webdriver
 from pandas import DataFrame, concat
@@ -7,6 +8,10 @@ from datetime import datetime, timezone, timedelta
 from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+
+# Configure error logging
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(message)s', filename='scraper.log',
+                    filemode='w')
 
 
 # Function to check if the current betting category contains "Over/Under" odds
@@ -173,10 +178,12 @@ def run_scrape():
         print("This scraping session is complete. Please check the results in result.csv."
               "The next scrape will occur in 20 minutes.")
 
-    except WebDriverException:
-        print("The web driver encountered an issue.")
+    except WebDriverException as e:
+        logging.error(f"Web driver encountered an issue: {e}")
+        print("An error occurred, please check scraper.log for details.")
     except Exception as e:
-        print("An unexpected error occurred:", e)
+        logging.error(f"An unexpected error occurred: {e}")
+        print("An error occurred, please check scraper.log for details.")
     finally:
         driver.quit()
 

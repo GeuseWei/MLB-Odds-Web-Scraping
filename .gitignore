@@ -1,0 +1,19 @@
+# Virtual environment
+venv/
+.env
+
+# Log files
+*.log
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Generated data files
+result.csv
+
+# OS generated files
+.DS_Store
+
+# Backup files
+*.bak

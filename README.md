@@ -1,10 +1,7 @@
 # SevenDot MLB Odds Web Scraping Project
 
-This project is designed to scrape MLB player odds information from the DraftKings Sportsbook website. It utilizes Selenium for web scraping to collect data on player betting odds, specifically focusing on 'Over/Under' odds for both batters and pitchers. The scraped data is structured and saved in a pandas DataFrame, and the entire scraping process is automated to run at 20-minute intervals.
-
 ## Project Overview
-
-The goal of this project is to provide a robust tool for collecting real-time odds data, which could be used for analysis, betting insights, or data-driven decision-making in sports analytics. It is particularly focused on extracting detailed odds information about MLB players from one of the leading betting platforms, making the data easily accessible and actionable.
+This project is designed to scrape MLB player odds information from the DraftKings Sportsbook website. It utilizes Selenium for web scraping to collect data on player betting odds, specifically focusing on 'Over/Under' odds for both batters and pitchers. The scraped data is structured and saved in a pandas DataFrame, and the entire scraping process is automated to run at 20-minute intervals.
 
 ## Technologies Used
 
@@ -14,6 +11,16 @@ The goal of this project is to provide a robust tool for collecting real-time od
 - **Git**: For version control and managing updates to the project.
 
 ## Execution Plan
+
+1. **Initialization**: Set up Selenium WebDriver and configure logging for error tracking.
+2. **Category Selection**: Navigate to specific categories on the DraftKings website and begin data extraction.
+3. **Data Extraction**: Verify categories, extract game times, team names, and player odds, and aggregate into a DataFrame.
+4. **Looping Through Categories**: Use a `while` loop to navigate and scrape data from all relevant subcategories by simulating clicks on subsequent tabs.
+5. **Scheduling**: Automate scraping to run at 20-minute intervals using the `schedule` library.
+6. **Error Handling**: Log exceptions to `scraper.log` and provide concise console messages for quick checks.
+7. **Shutdown**: Ensure proper closure of WebDriver sessions.
+8. **User Interruption**: Handle `KeyboardInterrupt` for graceful shutdown.
+## Setup Instructions
 
 Follow these instructions to set up and run the project on your local machine.
 
@@ -72,8 +79,10 @@ When you're finished working or need to deactivate the virtual environment, you 
 deactivate
 ```
 
+### Debugging
+If you encounter issues during the execution of the program, please refer to the `scraper.log`  file for detailed error information. This log captures all errors and is the first place to look for understanding any issues that arise. 
+
 ## Additional Notes
 
 - Ensure that your virtual environment is set up with the correct versions of Python and Selenium. Compatibility issues might arise with newer or outdated versions.
 - The scraper is configured to handle web elements dynamically, which means it should maintain functionality even if minor changes occur on the DraftKings website. However, significant changes to the website structure may require adjustments to the scraping script.
-- The application implements robust error handling mechanisms. If the browser is closed unexpectedly or the program is terminated during the scraping process, the system will catch these exceptions and provide friendly error messages to inform the user of what went wrong. 
