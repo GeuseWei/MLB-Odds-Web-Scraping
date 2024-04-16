@@ -75,8 +75,8 @@ def extract_event_data(row):
         odds = td.find_element(By.CLASS_NAME, 'sportsbook-outcome-cell__elements').text
         data_entries.append({
             'player_name': player_name,
-            'odds_type': odds_type,
             'over_under_total': over_under_total,
+            'odds_type': odds_type,
             'odds': odds
         })
     return data_entries
