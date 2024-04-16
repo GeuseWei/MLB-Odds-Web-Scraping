@@ -1,5 +1,6 @@
 import schedule
 import logging
+import argparse
 from time import sleep
 from selenium import webdriver
 from pandas import DataFrame, concat
@@ -7,6 +8,7 @@ from selenium.webdriver.common.by import By
 from datetime import datetime, timezone, timedelta
 from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as ec
 
 # Configure error logging
@@ -70,9 +72,16 @@ def extract_event_data(row):
 
     data_entries = []
     for td in td_elements:
-        odds_type = td.find_element(By.CLASS_NAME, 'sportsbook-outcome-cell__label').text
-        over_under_total = td.find_element(By.CLASS_NAME, 'sportsbook-outcome-cell__line').text
-        odds = td.find_element(By.CLASS_NAME, 'sportsbook-outcome-cell__elements').text
+        if td.find_elements(By.CLASS_NAME, 'sportsbook-empty-cell'):
+            # Sometimes the cell is empty
+            odds_type = ''
+            over_under_total = ''
+            odds = ''
+        else:
+            odds_type = td.find_element(By.CLASS_NAME, 'sportsbook-outcome-cell__label').text
+            over_under_total = td.find_element(By.CLASS_NAME, 'sportsbook-outcome-cell__line').text
+            odds = td.find_element(By.CLASS_NAME, 'sportsbook-outcome-cell__elements').text
+
         data_entries.append({
             'player_name': player_name,
             'over_under_total': over_under_total,
@@ -161,17 +170,24 @@ def scrape_main_category(driver, result, category):
 
 
 # Sets up the scraper to run at specified intervals
-def run_scrape():
+def run_scrape(headless=False):
     websites = ['https://sportsbook.draftkings.com/leagues/baseball/mlb?category=batter-props',
                 'https://sportsbook.draftkings.com/leagues/baseball/mlb?category=pitcher-props']
-
-    driver = webdriver.Chrome()
+    chrome_options = Options()
+    if headless:
+        chrome_options.add_argument("--headless")
+    driver = webdriver.Chrome(options=chrome_options)
     result = DataFrame()
 
     try:
         for website in websites:
             driver.get(website)
-            category = 'BATTER PROPS' if 'batter-props' in website else 'PITCHER PROPS'
+            category = 'Batter Props' if 'batter-props' in website else 'Pitcher Props'
+            if not driver.find_elements(By.XPATH, "//div[contains(text(), '" + category + "')]"):
+                print(f"The main category '{category}' is currently not available.")
+                continue
+
+            category = category.upper()
             result = scrape_main_category(driver, result, category)
 
         result.to_csv('result.csv', index=False)
@@ -191,8 +207,12 @@ def run_scrape():
 # Schedules the scraper function to run periodically
 def main():
     try:
-        run_scrape()
-        schedule.every(20).minutes.do(run_scrape)
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--headless', action='store_true')
+        args = parser.parse_args()
+
+        run_scrape(headless=args.headless)
+        schedule.every(20).minutes.do(lambda: run_scrape(headless=args.headless))
         while True:
             schedule.run_pending()
             sleep(1)

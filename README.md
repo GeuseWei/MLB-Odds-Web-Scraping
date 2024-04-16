@@ -63,10 +63,16 @@ pip install -r requirements.txt
 
 ### Running the Code
 
-To run the scraper:
+To run the scraper in head mode (default):
 
 ```bash
 python main.py
+```
+
+To run the scraper in headless mode:
+
+```bash
+python main.py --headless
 ```
 
 The program will execute every 20 minutes, scraping data and saving it to the result.csv file.
@@ -84,5 +90,8 @@ If you encounter issues during the execution of the program, please refer to the
 
 ## Additional Notes
 
-- Ensure that your virtual environment is set up with the correct versions of Python and Selenium. Compatibility issues might arise with newer or outdated versions.
-- The scraper is configured to handle web elements dynamically, which means it should maintain functionality even if minor changes occur on the DraftKings website. However, significant changes to the website structure may require adjustments to the scraping script.
+- **Browser Visibility**: If you are not running in headless mode, please ensure that the browser window is at the forefront during scraping to guarantee data integrity.
+
+- **Empty Data Cells**: Occasionally, the website may have empty cells where odds information is typically stored. The program is designed to handle these cases effectively, and corresponding entries in the DataFrame will be set as empty.
+
+- **Missing Categories**: Sometimes, the 'Batter Props' and 'Pitcher Props' categories may temporarily be absent due to updates on the website. The program recognizes this situation and will report it in the command line output.
