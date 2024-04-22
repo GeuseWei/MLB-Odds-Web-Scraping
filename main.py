@@ -183,7 +183,7 @@ def run_scrape(headless=False):
         for website in websites:
             driver.get(website)
             category = 'Batter Props' if 'batter-props' in website else 'Pitcher Props'
-            if not driver.find_elements(By.XPATH, "//div[contains(text(), '" + category + "')]"):
+            if not driver.find_elements(By.XPATH, "//div[text()='" + category + "']"):
                 print(f"The main category '{category}' is currently not available.")
                 continue
 
